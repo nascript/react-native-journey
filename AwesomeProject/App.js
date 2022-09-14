@@ -1,117 +1,135 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+import React, {useEffect, useState} from 'react';
+import {Image, Text, TextInput, View, ListItem, ScrollView} from 'react-native';
+import tw from 'twrnc';
 
-import React from 'react';
-import type {Node} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const App = () => {
+  const [dataSurah, setDataSurah] = useState([]);
+  const [dataAyah, setDataAyah] = useState([]);
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  useEffect(() => {
+    getSurahQuran();
+    getAyahQuran();
+  }, []);
 
-/* $FlowFixMe[missing-local-annot] The type annotation(s) required by Flow's
- * LTI update could not be added via codemod */
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+  // const getSurahQuran = async () => {
+  //   const data = await  fetch('http://api.alquran.cloud/v1/surah').then(response => response.json()).then(json => setDataSurah(json))
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  //   return data
+  // }
+  const getAyahQuran = async () => {
+    const data = await fetch('https://equran.id/api/surat/1').then(response =>
+      response.json(),
+    );
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    setDataAyah(data);
+    return data;
+  };
+
+  const getSurahQuran = async () => {
+    const data = await fetch('https://equran.id/api/surat').then(response =>
+      response.json(),
+    );
+
+    setDataSurah(data);
+    return data;
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits. Nas
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <ScrollView>
+      <AyahList data={dataAyah} />
+      <SurahList data={dataSurah} />
+    </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+const SurahList = ({data}) => {
+  const list = () => {
+    return data?.map(element => {
+      return (
+        <>
+          <View
+            key={element.key}
+            style={{
+              margin: 10,
+              backgroundColor: '#B52F72',
+              padding: 10,
+            }}>
+            <View
+              key={element.key}
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              }}>
+              {/* <Text>{element.nama}</Text> */}
+              <Text style={{marginRight: 3, fontSize: 16, color: 'white'}}>
+                {element.nama_latin} {element.jumlah_ayat}
+              </Text>
+              <Text style={{marginRight: 3, fontSize: 15, color: 'white'}}>
+                {element.nama}
+              </Text>
+            </View>
+            <Text style={{marginRight: 3, fontSize: 15, color: 'white'}}>
+              {element.tempat_turun}
+            </Text>
+          </View>
+        </>
+      );
+    });
+  };
+
+  return <View>{list()}</View>;
+};
+const AyahList = ({data}) => {
+  const dataQuran = data?.ayat;
+
+  const list = () => {
+    return (
+      <>
+        <View
+          style={{
+            margin: 10,
+            display: 'flex',
+            flexDirection: 'row',
+            backgroundColor: '#B52F72',
+            padding: 10,
+          }}>
+          <Text style={{marginRight: 3, fontSize: 30, color: 'white'}}>
+            {data?.nama_latin}
+          </Text>
+          <Text
+            style={{
+              marginRight: 3,
+              fontSize: 20,
+              color: 'black',
+              backgroundColor: 'white',
+              height: 20,
+              width: 20,
+              borderRadius: 100,
+              textAlign: 'center',
+            }}>
+            {data?.jumlah_ayat}
+          </Text>
+        </View>
+        <View style={{margin: 10}}>
+          {dataQuran?.map(element => {
+            return (
+              <View key={element.key} style={{margin: 10, display: 'flex'}}>
+                <Text>{element.ar}</Text>
+                <Text>{element.idn}</Text>
+              </View>
+            );
+          })}
+        </View>
+      </>
+    );
+  };
+
+  return (
+    <>
+      <View>{list()}</View>
+    </>
+  );
+};
 
 export default App;
